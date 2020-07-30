@@ -1,19 +1,26 @@
 package de.tictactoe
 
-import de.tictactoe.model.gameboardComponent.gameboardBaseImpl.{Gameboard, Piece}
+import com.google.inject.Guice
+import de.tictactoe.aview.Tui
+import de.tictactoe.controller.controllerComponent.ControllerInterface
+import de.tictactoe.model.gameboardComponent.GameboardInterface
+import de.tictactoe.model.gameboardComponent.gameboardBaseImpl.{Game, Gameboard, Piece}
+import de.tictactoe.model.playerComponent.Player
 
 import scala.io.StdIn.readLine
 
 object TicTacToe {
+  val injector = Guice.createInjector(new TicTacToeModule)
+  val controller = injector.getInstance(classOf[ControllerInterface])
+  val tui = new Tui(controller)
+  //val gui = new PlayerFrame(controller)
 
   def main(args: Array[String]): Unit = {
-    println("Welcome to TicTacToe")
-    var gameboard = new Gameboard(false)
-    println(gameboard)
-    gameboard = gameboard.addXO(0,0,Piece.PieceVal("X"))
-    println(gameboard)
-    gameboard = gameboard.addXO(1,0,Piece.PieceVal("O"))
-    println(gameboard)
+    var input = ""
+    do {
+      input = readLine()
+      println(tui.processInputLine(input))
+    } while (!input.equals("q"))
   }
 
 }

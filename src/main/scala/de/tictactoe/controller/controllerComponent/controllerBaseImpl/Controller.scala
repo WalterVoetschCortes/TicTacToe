@@ -4,7 +4,7 @@ import com.google.inject.{Guice, Inject}
 import de.tictactoe.TicTacToeModule
 import de.tictactoe.controller.controllerComponent.{ControllerInterface, FieldChanged, GameFinishedDraw, GameFinishedWinner, NewGame, PlayerChanged, PlayerSwitch}
 import de.tictactoe.model.gameboardComponent.GameboardInterface
-import de.tictactoe.model.gameboardComponent.gameboardBaseImpl.{Field, Game, Gameboard, Matrix}
+import de.tictactoe.model.gameboardComponent.gameboardBaseImpl.{Field, Gameboard, Matrix}
 import de.tictactoe.model.playerComponent.Player
 import de.tictactoe.util.UndoManager
 
@@ -17,7 +17,7 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
 
   var player0 = Player("Player0")
   var player1 = Player("Player1")
-  var game = Game(player0, player1, gameboard)
+  //var game = Game(player0, player1, gameboard)
   var playerList = List[Player](player0,player1)
   var currentPlayerIndex: Int = 0
   private val undoManager = new UndoManager
@@ -27,8 +27,20 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
     state.handle(input)
   }
 
+  /**
+   * sets players involved in the Game with input:String
+   * puts player names in the list playerList
+   * @param input
+   * @return
+   */
   override def setPlayers(input: String): String = {
-    playerList = game.setPlayers(input)
+    input.split(" ").map(_.trim).toList match{
+      case playerA :: playerB :: Nil =>
+        player0 = player0.copy(playerA)
+        player1 = player1.copy(playerB)
+        playerList = List[Player](player0,player1)
+      case _ => return "Wrong input!! Try it again!"
+    }
     nextState
     publish(new PlayerChanged)
     ""
@@ -36,11 +48,10 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
 
   override def createEmptyGameboard: String = {
     gameboard= new Gameboard(false)
-    game = game.copy(player0, player1, gameboard)
     state = EnterPlayerState(this)
     publish(new NewGame)
     currentPlayerIndex=0
-    "created new game board\nPlease enter the names like (player1 player2)"
+    ""
   }
 
   private def checkWin(): Boolean = false
@@ -48,6 +59,11 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
   private def checkDraw():Boolean = false
 
   override def set(row: Int, col: Int): String = {
+    if( 0 > row || 2 < row || 0 > col || 2 < col ){ //out of bounds
+      return "Out of bounds!! Try it again!"
+    } else if (gameboard.fields.field(row,col).isSet){//field is already set
+      return "Field is already set!! Try it again!"
+    }
     currentPlayerIndex match {
       case 0 =>
         undoManager.doStep(new SetCommand(currentPlayerIndex, row, col, this))
@@ -70,8 +86,8 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
         publish(new PlayerChanged)
     }
     publish(new FieldChanged)
-    "put your X or O with following input: p row col\n" +
-        playerList(currentPlayerIndex) + " it's your turn!"
+    "Set your X or O with following input: s row col\n" +
+      playerList(currentPlayerIndex) + "! it's your turn!"
   }
 
   override def gameboardToString: String = gameboard.toString
@@ -98,8 +114,6 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
   }
 
   override def nextPlayer: Int = if (currentPlayerIndex == 0) 1 else 0
-
-  override def getField:Matrix[Field] = gameboard.fields
 
   override def load: String = ???
 

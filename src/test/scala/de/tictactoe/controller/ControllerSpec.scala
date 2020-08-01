@@ -1,0 +1,48 @@
+package de.tictactoe.controller
+
+import de.tictactoe.controller.controllerComponent.controllerBaseImpl.Controller
+import de.tictactoe.model.gameboardComponent.gameboardBaseImpl.{Gameboard}
+import org.scalatest.{Matchers, WordSpec}
+
+class ControllerSpec extends WordSpec with Matchers{
+
+  "A Controller" when {
+    "created" should {
+
+      val gameboard = new Gameboard(false)
+      val controller = new Controller(gameboard)
+
+      "can handle" in {
+        controller.handle("player1 player2") should be("")
+      }
+      "can set players with wrong input" in {
+        controller.setPlayers("player1 player2 player3") should be("Wrong input!! Try it again!")
+      }
+      "can set players" in {
+        controller.setPlayers("player1 player2") should be("")
+      }
+      "can create empty game board" in {
+        controller.createEmptyGameboard should be("")
+      }
+      "can set X or O in game board with player1" in {
+        controller.set(0,0) should be ("Set your X or O with following input: s row col\nplayer2! it's your turn!")
+      }
+      "can set X or O in a occupied field and don't permit it" in{
+        controller.set(0,0) should be ("Field is already set!! Try it again!")
+      }
+      "can set X or O in a field out of bounds and don't permit it" in{
+        controller.set(8,5) should be ("Out of bounds!! Try it again!")
+      }
+      "can set X or O in game board with player2" in {
+        controller.set(0,1) should be ("Set your X or O with following input: s row col\nplayer1! it's your turn!")
+      }
+      "can create empty game board again" in {
+        controller.createEmptyGameboard should be("")
+      }
+      "and set again new players" in {
+        controller.setPlayers("p1 p2")
+      }
+
+    }
+  }
+}

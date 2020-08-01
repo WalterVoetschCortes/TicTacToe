@@ -17,7 +17,6 @@ trait ControllerInterface extends Publisher{
   def nextPlayer:Int
   def playerList:List[Player]
   def currentPlayerIndex:Int
-  def getField:Matrix[Field]
   def load:String
   def save:String
 }

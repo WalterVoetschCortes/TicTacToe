@@ -1,4 +1,3 @@
-
 name := "TicTacToe"
 organization  := "de.htwg.se.tictactoe"
 version       := "0.2.0"

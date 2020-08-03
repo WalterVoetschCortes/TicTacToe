@@ -1,6 +1,5 @@
 package de.tictactoe.controller
 
-import com.sun.media.jfxmedia.events.PlayerStateEvent.PlayerState
 import de.tictactoe.controller.controllerComponent.controllerBaseImpl.{Controller, PlayState}
 import de.tictactoe.model.gameboardComponent.gameboardBaseImpl.Gameboard
 import org.scalatest.{Matchers, WordSpec}

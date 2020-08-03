@@ -6,9 +6,8 @@ A little info about my project TicTacToe.
 
 ## Build Status
 
-Build status of continuous integration with travis:
+Build status of continuous integration with jenkins:
 
-[![Build Status](https://travis-ci.com/WalterVoetschCortes/TicTacToe.svg?branch=master)](https://travis-ci.com/WalterVoetschCortes/TicTacToe)
 
 
 ## Gameplay

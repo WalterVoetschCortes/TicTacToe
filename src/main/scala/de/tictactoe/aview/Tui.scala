@@ -21,8 +21,8 @@ class Tui(controller: ControllerInterface) extends Reactor {
 
   reactions +={
     case event: FieldChanged => printTui
-    case event: PlayerChanged => println("Hello " + controller.playerList(0) + " and "+ controller.playerList(1) + "!\n"
-      + controller.playerList(0) + "! it's your turn!\nSet your X or O with following input: s row col")
+    case event: PlayerChanged => println(controller.playerList(controller.currentPlayerIndex) + "! it's your turn!\n" +
+      "Set your X or O with following input: s row col")
     case event: NewGame =>
       printTui
       println("Created new game board\nPlease enter the names like (player1 player2)")

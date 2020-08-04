@@ -7,6 +7,7 @@ import de.tictactoe.model.gameboardComponent.GameboardInterface
 import de.tictactoe.model.gameboardComponent.gameboardBaseImpl.{Field, Gameboard, Matrix}
 import de.tictactoe.model.playerComponent.Player
 import de.tictactoe.util.UndoManager
+import scala.util.control.Breaks._
 
 import scala.swing.Publisher
 
@@ -20,8 +21,10 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
   //var game = Game(player0, player1, gameboard)
   var playerList = List[Player](player0,player1)
   var currentPlayerIndex: Int = 0
+  var setCount = 0
   private val undoManager = new UndoManager
   var state: ControllerState = EnterPlayerState(this)
+
 
   override def handle(input: String): String = {
     state.handle(input)
@@ -47,6 +50,7 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
   }
 
   override def createEmptyGameboard: String = {
+    setCount = 0
     gameboard= new Gameboard(false)
     state = EnterPlayerState(this)
     publish(new NewGame)
@@ -54,37 +58,96 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
     ""
   }
 
-  private def checkWin(): Boolean = false
+  private def checkWin(row:Int, col:Int): Boolean = {
+    //check col
+    breakable {
+      for(i <- 0 to 2) {
+        if (currentPlayerIndex == 0) {
+          if (gameboard.fields.field(row, i).isSet) {
+            if (!gameboard.fields.field(row, i).piece.get.value.equals("X")) break
+          }
+        } else {
+          if (gameboard.fields.field(row, i).isSet) {
+            if (!gameboard.fields.field(row, i).piece.get.value.equals("O")) break
+          }
+        }
+        if (i == 2) {
+          return true
+        }
+      }
+    }
 
-  private def checkDraw():Boolean = false
+    //check row
+    breakable {
+      for(i <- 0 to 2) {
+        if (currentPlayerIndex == 0) {
+          if (gameboard.fields.field(i, col).isSet) {
+            if (!gameboard.fields.field(i, col).piece.get.value.equals("X")) break
+          }
+        } else {
+          if (gameboard.fields.field(i, col).isSet) {
+            if (!gameboard.fields.field(i, col).piece.get.value.equals("O")) break
+          }
+        }
+        if (i == 2) {
+          return true
+        }
+      }
+    }
+
+    //check diag
+    breakable {
+      if(row == col){
+        for(i <- 0 to 2){
+          if (currentPlayerIndex == 0) {
+            if (gameboard.fields.field(i, i).isSet) {
+              if (!gameboard.fields.field(i, i).piece.get.value.equals("X")) break
+            }
+          } else {
+            if (gameboard.fields.field(i, i).isSet) {
+              if (!gameboard.fields.field(i, i).piece.get.value.equals("O")) break
+            }
+          }
+          if(i == 2){
+            return true
+          }
+        }
+      }
+    }
+
+    false
+  }
+
+  private def checkDraw():Boolean = {
+    //check draw
+    if(setCount == (Math.pow(3, 2) - 1)){
+      return true
+    }
+    false
+  }
 
   override def set(row: Int, col: Int): String = {
+    setCount += 1
     if( 0 > row || 2 < row || 0 > col || 2 < col ){ //out of bounds
       return "Out of bounds!! Try it again!"
     } else if (gameboard.fields.field(row,col).isSet){//field is already set
       return "Field is already set!! Try it again!"
     }
-    currentPlayerIndex match {
-      case 0 =>
-        undoManager.doStep(new SetCommand(currentPlayerIndex, row, col, this))
+    undoManager.doStep(new SetCommand(currentPlayerIndex, row, col, this))
 
-        if (checkWin()) {
-          publish(new GameFinishedWinner)
-        } else if(checkDraw()){
-          publish(new GameFinishedDraw)
-        }
-        currentPlayerIndex = nextPlayer
-        publish(new PlayerChanged)
-      case 1 =>
-        undoManager.doStep(new SetCommand(currentPlayerIndex, row, col, this))
-        if (checkWin()) {
-          publish(new GameFinishedWinner)
-        } else if(checkDraw()){
-          publish(new GameFinishedDraw)
-        }
-        currentPlayerIndex = nextPlayer
-        publish(new PlayerChanged)
+    if (checkWin(row, col)) {
+      publish(new GameFinishedWinner)
+      return playerList(currentPlayerIndex).name + "! You won!!!"
     }
+    if(checkDraw()){
+      publish(new GameFinishedDraw)
+      return "Sorry " + playerList(0) + " and " + playerList(1) + "! " +
+        "The game ended in a tie"
+    }
+
+    currentPlayerIndex = nextPlayer
+    publish(new PlayerChanged)
+
     publish(new FieldChanged)
     "Set your X or O with following input: s row col\n" +
       playerList(currentPlayerIndex) + "! it's your turn!"

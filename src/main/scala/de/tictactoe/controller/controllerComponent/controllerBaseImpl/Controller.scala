@@ -168,16 +168,15 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
       publish(new GameFinishedWinner)
       state = state.nextState()
       currentPlayerIndex = 0
-      return playerList(currentPlayerIndex).name + "! You won!!! " +
-        "\nPlease enter your names like (player1 player2) to start a new game!"
+      return "Please enter your names like (player1 player2) to start a new game!"
     }
     if(checkDraw()){
       publish(new GameFinishedDraw)
       state = state.nextState()
       currentPlayerIndex = 0
       return "Sorry " + playerList(0) + " and " + playerList(1) + "! " +
-        "The game ended in a tie! " +
-        "\nPlease enter your names like (player1 player2) to start a new game!"
+        "The game ended in a tie!" +
+        "\n\nPlease enter your names like (player1 player2) to start a new game!"
     }
 
     currentPlayerIndex = nextPlayer

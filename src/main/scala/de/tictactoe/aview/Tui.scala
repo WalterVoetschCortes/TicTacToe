@@ -37,6 +37,4 @@ class Tui(controller: ControllerInterface) extends Reactor {
   def printTui: Unit = {
     println(controller.gameboardToString)
   }
-
-
 }

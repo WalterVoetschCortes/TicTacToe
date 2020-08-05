@@ -2,10 +2,8 @@ package de.tictactoe
 
 import com.google.inject.Guice
 import de.tictactoe.aview.Tui
+import de.tictactoe.aview.gui.Gui
 import de.tictactoe.controller.controllerComponent.ControllerInterface
-import de.tictactoe.model.gameboardComponent.GameboardInterface
-import de.tictactoe.model.gameboardComponent.gameboardBaseImpl.{Gameboard, Piece}
-import de.tictactoe.model.playerComponent.Player
 
 import scala.io.StdIn.readLine
 
@@ -13,7 +11,9 @@ object TicTacToe {
   val injector = Guice.createInjector(new TicTacToeModule)
   val controller = injector.getInstance(classOf[ControllerInterface])
   val tui = new Tui(controller)
-  //val gui = new PlayerFrame(controller)
+  val gui = new Gui(controller)
+  gui.main(Array())
+
 
   def main(args: Array[String]): Unit = {
     println(welcome())

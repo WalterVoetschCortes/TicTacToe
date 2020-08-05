@@ -4,7 +4,7 @@ import com.google.inject.{Guice, Inject}
 import de.tictactoe.TicTacToeModule
 import de.tictactoe.controller.controllerComponent.{ControllerInterface, FieldChanged, GameFinishedDraw, GameFinishedWinner, NewGame, PlayerChanged, PlayerSwitch}
 import de.tictactoe.model.gameboardComponent.GameboardInterface
-import de.tictactoe.model.gameboardComponent.gameboardBaseImpl.{Field, Gameboard, Matrix}
+import de.tictactoe.model.gameboardComponent.gameboardBaseImpl.{Gameboard}
 import de.tictactoe.model.playerComponent.Player
 import de.tictactoe.util.UndoManager
 import scala.util.control.Breaks._

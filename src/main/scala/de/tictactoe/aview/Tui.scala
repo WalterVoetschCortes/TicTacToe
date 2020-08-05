@@ -26,9 +26,11 @@ class Tui(controller: ControllerInterface) extends Reactor {
     case event: NewGame =>
       printTui
       println("Created new game board\nPlease enter the names like (player1 player2)")
-    case event: GameFinishedWinner => println("Game finished! " + controller.playerList(controller.currentPlayerIndex)
+    case event: GameFinishedWinner => printTui
+      println("Game finished! " + controller.playerList(controller.currentPlayerIndex)
       + " has won the game!")
-    case event: GameFinishedDraw => println("Game finished! No winner! :(")
+    case event: GameFinishedDraw => printTui
+      println("Game finished! No winner! :(")
     case event: PlayerSwitch => println(controller.playerList(controller.currentPlayerIndex) + " it's youre turn!")
   }
 

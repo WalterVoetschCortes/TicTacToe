@@ -10,4 +10,5 @@ object Piece extends Enumeration {
 
   val player1 = PieceVal("X")
   val player2 = PieceVal("O")
+  val empty = PieceVal(" ")
 }

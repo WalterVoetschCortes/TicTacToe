@@ -59,14 +59,16 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
   }
 
   private def checkWin(row:Int, col:Int): Boolean = {
-    //check col
+    //check row
     breakable {
       for(i <- 0 to 2) {
         if (currentPlayerIndex == 0) {
+          if(!gameboard.fields.field(row,i).isSet) break
           if (gameboard.fields.field(row, i).isSet) {
             if (!gameboard.fields.field(row, i).piece.get.value.equals("X")) break
           }
         } else {
+          if(!gameboard.fields.field(row,i).isSet) break
           if (gameboard.fields.field(row, i).isSet) {
             if (!gameboard.fields.field(row, i).piece.get.value.equals("O")) break
           }
@@ -77,14 +79,16 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
       }
     }
 
-    //check row
+    //check col
     breakable {
       for(i <- 0 to 2) {
         if (currentPlayerIndex == 0) {
+          if(!gameboard.fields.field(i,col).isSet) break
           if (gameboard.fields.field(i, col).isSet) {
             if (!gameboard.fields.field(i, col).piece.get.value.equals("X")) break
           }
         } else {
+          if(!gameboard.fields.field(i,col).isSet) break
           if (gameboard.fields.field(i, col).isSet) {
             if (!gameboard.fields.field(i, col).piece.get.value.equals("O")) break
           }
@@ -95,17 +99,42 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
       }
     }
 
+
     //check diag
     breakable {
       if(row == col){
         for(i <- 0 to 2){
           if (currentPlayerIndex == 0) {
+            if(!gameboard.fields.field(i,i).isSet) break()
             if (gameboard.fields.field(i, i).isSet) {
               if (!gameboard.fields.field(i, i).piece.get.value.equals("X")) break
             }
           } else {
+            if(!gameboard.fields.field(i,i).isSet) break()
             if (gameboard.fields.field(i, i).isSet) {
               if (!gameboard.fields.field(i, i).piece.get.value.equals("O")) break
+            }
+          }
+          if(i == 2){
+            return true
+          }
+        }
+      }
+    }
+
+    //check anti diag
+    breakable {
+      if(row + col == 2){
+        for(i <- 0 to 2){
+          if (currentPlayerIndex == 0) {
+            if(!gameboard.fields.field(2-i, i).isSet) break
+            if (gameboard.fields.field(2-i, i).isSet) {
+              if (!gameboard.fields.field(2-i, i).piece.get.value.equals("X")) break
+            }
+          } else {
+            if(!gameboard.fields.field(2-i,i).isSet) break()
+            if (gameboard.fields.field(2-i, i).isSet) {
+              if (!gameboard.fields.field(2-i, i).piece.get.value.equals("O")) break
             }
           }
           if(i == 2){
@@ -137,12 +166,18 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
 
     if (checkWin(row, col)) {
       publish(new GameFinishedWinner)
-      return playerList(currentPlayerIndex).name + "! You won!!!"
+      state = state.nextState()
+      currentPlayerIndex = 0
+      return playerList(currentPlayerIndex).name + "! You won!!! " +
+        "\nPlease enter your names like (player1 player2) to start a new game!"
     }
     if(checkDraw()){
       publish(new GameFinishedDraw)
+      state = state.nextState()
+      currentPlayerIndex = 0
       return "Sorry " + playerList(0) + " and " + playerList(1) + "! " +
-        "The game ended in a tie"
+        "The game ended in a tie! " +
+        "\nPlease enter your names like (player1 player2) to start a new game!"
     }
 
     currentPlayerIndex = nextPlayer

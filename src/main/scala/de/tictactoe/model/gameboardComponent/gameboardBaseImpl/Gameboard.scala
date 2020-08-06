@@ -34,7 +34,7 @@ case class Gameboard @Inject() (fields: Matrix[Field]) extends GameboardInterfac
    */
   override def legend: String = {
     val welcome = "**********  TicTacToe  **********\n\n"
-    val n = "n:   create a new empty game board\n"
+    val n = "n:   create a new game\n"
     val z = "z:   undo\n"
     val y = "y:   redo\n"
     val s = "s:   save\n"

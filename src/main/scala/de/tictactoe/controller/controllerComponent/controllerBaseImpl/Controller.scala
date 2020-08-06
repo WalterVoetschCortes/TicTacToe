@@ -2,13 +2,13 @@ package de.tictactoe.controller.controllerComponent.controllerBaseImpl
 
 import com.google.inject.{Guice, Inject}
 import de.tictactoe.TicTacToeModule
-import de.tictactoe.controller.controllerComponent.{ControllerInterface, FieldChanged, GameFinishedDraw, GameFinishedWinner, NewGame, PlayerChanged, PlayerSwitch}
+import de.tictactoe.controller.controllerComponent.{ControllerInterface, FieldChanged, GameFinishedWinner, NewGame, NewRound, PlayerChanged, PlayerSwitch, RoundFinishedDraw, ScoreChanged}
 import de.tictactoe.model.gameboardComponent.GameboardInterface
-import de.tictactoe.model.gameboardComponent.gameboardBaseImpl.{Gameboard}
+import de.tictactoe.model.gameboardComponent.gameboardBaseImpl.Gameboard
 import de.tictactoe.model.playerComponent.Player
 import de.tictactoe.util.UndoManager
-import scala.util.control.Breaks._
 
+import scala.util.control.Breaks._
 import scala.swing.Publisher
 
 class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerInterface with Publisher {
@@ -18,10 +18,13 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
 
   var player0 = Player("Player0")
   var player1 = Player("Player1")
-  //var game = Game(player0, player1, gameboard)
   var playerList = List[Player](player0,player1)
   var currentPlayerIndex: Int = 0
   var setCount = 0
+  var player0Score = 0
+  var player1Score = 0
+  var maxScore = 3
+
   private val undoManager = new UndoManager
   var state: ControllerState = EnterPlayerState(this)
 
@@ -44,17 +47,49 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
         playerList = List[Player](player0,player1)
       case _ => return "Wrong input!! Try it again!"
     }
-    nextState
+    state = state.nextState
     publish(new PlayerChanged)
+    "Now set the maximum score between 0 and 100"
+  }
+
+  override def setMaxScore(input: String): String ={
+    try {
+      input.toInt
+    } catch {
+      case e: Exception => return "Wrong input! You have to set the maximum score between 0 and 100! Try it again!"
+    }
+
+    if(100 > input.toInt && input.toInt> 0){
+      maxScore = input.toInt
+    } else {
+      return "Maximum score has to be between 0 and 100!! xxxTry it again!"
+    }
+
+    publish(new ScoreChanged)
+    state = state.nextState
     ""
   }
 
-  override def createEmptyGameboard: String = {
+  override def createNewGame:String ={
     setCount = 0
+    currentPlayerIndex = 0
+    maxScore = 3
+    player0Score = 0
+    player1Score = 0
     gameboard= new Gameboard(false)
     state = EnterPlayerState(this)
-    publish(new NewGame)
     currentPlayerIndex=0
+    publish(new NewGame)
+    ""
+  }
+
+  override def createNewRound: String = {
+    setCount = 0
+    gameboard= new Gameboard(false)
+    currentPlayerIndex=nextPlayer
+    publish(new PlayerSwitch)
+    publish(new NewRound)
+
     ""
   }
 
@@ -165,22 +200,27 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
     undoManager.doStep(new SetCommand(currentPlayerIndex, row, col, this))
 
     if (checkWin(row, col)) {
-      publish(new GameFinishedWinner)
-      state = state.nextState()
-      currentPlayerIndex = 0
-      return "Please enter your names like (player1 player2) to start a new game!"
+      if(currentPlayerIndex == 0){
+        player0Score += 1
+      } else {
+        player1Score += 1
+      }
+      if(maxScore == player0Score || maxScore == player1Score) {
+        publish(new GameFinishedWinner)
+        createNewGame
+        return ""
+      }
+      createNewRound
+      return ""
     }
     if(checkDraw()){
-      publish(new GameFinishedDraw)
-      state = state.nextState()
-      currentPlayerIndex = 0
+      publish(new RoundFinishedDraw)
+      createNewRound
       return "Sorry " + playerList(0) + " and " + playerList(1) + "! " +
-        "The game ended in a tie!" +
-        "\n\nPlease enter your names like (player1 player2) to start a new game!"
-    }
+        "The round ended in a tie!"}
 
     currentPlayerIndex = nextPlayer
-    publish(new PlayerChanged)
+    publish(new PlayerSwitch)
 
     publish(new FieldChanged)
     "Set your X or O with following input: s row col\n" +
@@ -190,6 +230,10 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
   override def gameboardToString: String = gameboard.toString
 
   override def undo: String = {
+    if(setCount <= 0){
+      return "can't do undo"
+    }
+    setCount -= 1
     currentPlayerIndex = nextPlayer
     undoManager.undoStep
     publish(new FieldChanged)

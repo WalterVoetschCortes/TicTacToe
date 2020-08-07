@@ -256,7 +256,7 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
 
   override def nextPlayer: Int = if (currentPlayerIndex == 0) 1 else 0
 
-  override def load: String = ???
+  override def load: String = ""
 
-  override def save: String = ???
+  override def save: String = ""
 }

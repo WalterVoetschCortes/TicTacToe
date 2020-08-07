@@ -75,13 +75,14 @@ class TuiSpec extends WordSpec with Matchers{
     "handle set O of p2 in field(1,2) and the game ended in a tie" in{
       tui.processInputLine("s 1 2")
     }
-    /*
+    "undo again" in {
+      tui.processInputLine("z")
+    }
     "save" in {
       tui.processInputLine("s")
     }
     "load" in {
       tui.processInputLine("l")
     }
-     */
   }
 }

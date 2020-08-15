@@ -214,39 +214,63 @@ class Gui(controller:ControllerInterface) extends Frame {
   }
 
   def setNamesPanel = new GridPanel(2,2){
+    background = mainColor
     contents += new Label {
       text = "Player 1:"
-      foreground= mainColor
+      foreground= Color.WHITE
       font = playersFont
     }
     contents += player1TextField
     vGap = 10
     contents += new Label {
       text = "Player 2:"
-      foreground= mainColor
+      foreground= Color.WHITE
       font = playersFont
     }
     contents += player2TextField
   }
 
+  //slider to choose number of rounds
   val slider = new Slider{
-    //val labelTabel = new mutable.HashTable[] {}
+    background = mainColor
+    labels = Map(1-> new Label{text = "1"; foreground= Color.WHITE},2-> new Label{text = "2"; foreground= Color.WHITE},
+            3-> new Label{text = "3"; foreground= Color.WHITE},4-> new Label{text = "4"; foreground= Color.WHITE},
+            5-> new Label{text = "5"; foreground= Color.WHITE},6-> new Label{text = "6"; foreground= Color.WHITE},
+            7-> new Label{text = "7"; foreground= Color.WHITE},8-> new Label{text = "8"; foreground= Color.WHITE},
+            9-> new Label{text = "9"; foreground= Color.WHITE}, 10-> new Label{text = "10"; foreground= Color.WHITE})
     min = 1
     max = 10
     value = 1
+
     minorTickSpacing = 1
     majorTickSpacing = 10
     paintTicks = true
-    paintTrack = true
+    //paintTrack = true
     paintLabels = true
     snapToTicks = true
+
+    foreground = Color.WHITE
+
+    visible = true
+  }
+
+  def sliderPanel = new GridPanel(1,2){
+    background = mainColor
+    contents += new Label {
+      text = "number of rounds:"
+      foreground= Color.WHITE
+      font = playersFont
+    }
+    vGap = 10
+    contents += slider
   }
 
   val secondSmainPanel = new GridPanel(2,1) {
     border = BorderFactory.createEmptyBorder(0,0,0,0)
     vGap = 10
     contents += setNamesPanel
-    contents += slider
+    contents += sliderPanel
+    background = mainColor
   }
 
   val secondSxButton = new Button{

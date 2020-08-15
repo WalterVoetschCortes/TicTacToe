@@ -56,13 +56,13 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
     try {
       input.toInt
     } catch {
-      case e: Exception => return "Wrong input! You have to set the maximum score between 0 and 100! Try it again!"
+      case e: Exception => return "Wrong input! You have to set the maximum score between 0 and 11! Try it again!"
     }
 
-    if(100 > input.toInt && input.toInt> 0){
+    if(11 > input.toInt && input.toInt> 0){
       maxScore = input.toInt
     } else {
-      return "Maximum score has to be between 0 and 100!! xxxTry it again!"
+      return "Maximum score has to be between 0 and 11!! xxxTry it again!"
     }
 
     publish(new ScoreChanged)

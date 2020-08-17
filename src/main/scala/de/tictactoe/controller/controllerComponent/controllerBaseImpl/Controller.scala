@@ -4,7 +4,7 @@ import com.google.inject.{Guice, Inject}
 import de.tictactoe.TicTacToeModule
 import de.tictactoe.controller.controllerComponent.{ControllerInterface, FieldChanged, GameFinishedWinner, NewGame, NewRound, PlayerChanged, PlayerSwitch, RoundFinishedDraw, ScoreChanged}
 import de.tictactoe.model.gameboardComponent.GameboardInterface
-import de.tictactoe.model.gameboardComponent.gameboardBaseImpl.Gameboard
+import de.tictactoe.model.gameboardComponent.gameboardBaseImpl.{Field, Gameboard, Matrix}
 import de.tictactoe.model.playerComponent.Player
 import de.tictactoe.util.UndoManager
 
@@ -228,6 +228,8 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
   }
 
   override def gameboardToString: String = gameboard.toString
+
+  override def getField: Matrix[Field] = gameboard.fields
 
   override def undo: String = {
     if(setCount <= 0){

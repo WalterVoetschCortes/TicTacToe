@@ -13,6 +13,7 @@ trait ControllerInterface extends Publisher{
   def createNewRound:String
   def set(row:Int, col:Int):String
   def gameboardToString:String
+  def getField: Matrix[Field]
   def undo:String
   def redo:String
   def nextState:Unit

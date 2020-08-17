@@ -5,7 +5,7 @@ import java.awt.{Color, Font, GridBagConstraints, Insets}
 import de.tictactoe.controller.controllerComponent.ControllerInterface
 import javax.swing.{BorderFactory, WindowConstants}
 
-import scala.swing.{Button, Frame, GridBagPanel, GridPanel, Label, Slider, TextField}
+import scala.swing.{Button, Dimension, Frame, GridBagPanel, GridPanel, Label, Slider, TextField}
 import java.awt.{Frame => AWTFrame}
 import java.io.File
 
@@ -26,6 +26,9 @@ class Gui(controller:ControllerInterface) extends Frame {
 
   //exits program when window is closed:
   peer.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE)
+
+  //fields of tic-tac-toe matrix:
+  var fields = Array.ofDim[FieldPanel](3, 3)
 
   //music sound:
   val resourcesPathMusic = getClass.getResource("/MusicL.wav")
@@ -205,15 +208,18 @@ class Gui(controller:ControllerInterface) extends Frame {
     foreground= blueGrey
     font = setNamesFont
     border = BorderFactory.createEmptyBorder(0,10,0,0)
+    preferredSize = new Dimension(100,50)
   }
 
   val player2TextField = new TextField("", 10){
     foreground= blueGrey
     font = setNamesFont
     border = BorderFactory.createEmptyBorder(0,10,0,0)
+    preferredSize = new Dimension(100,50)
   }
 
   def setNamesPanel = new GridPanel(2,2){
+    border = BorderFactory.createEmptyBorder(50,0,50,50)
     background = mainColor
     contents += new Label {
       text = "Player 1:"
@@ -232,6 +238,7 @@ class Gui(controller:ControllerInterface) extends Frame {
 
   //slider to choose number of rounds
   val slider = new Slider{
+    border = BorderFactory.createEmptyBorder(0,0,0,50)
     background = mainColor
     labels = Map(1-> new Label{text = "1"; foreground= Color.WHITE},2-> new Label{text = "2"; foreground= Color.WHITE},
             3-> new Label{text = "3"; foreground= Color.WHITE},4-> new Label{text = "4"; foreground= Color.WHITE},
@@ -254,7 +261,28 @@ class Gui(controller:ControllerInterface) extends Frame {
     visible = true
   }
 
-  def sliderPanel = new GridPanel(1,2){
+  val playButton = new Button{
+    background = mainColor
+    text = "play"
+    foreground = Color.WHITE
+    focusPainted = false
+    font = xFont
+
+    this.opaque = false
+    this.contentAreaFilled = false
+    this.borderPainted = false
+
+    //hover effect:
+    listenTo(mouse.moves)
+    reactions += {
+      case MouseEntered(_, _, _) =>
+        foreground = blueGrey
+      case MouseExited(_, _, _) =>
+        foreground = Color.WHITE
+    }
+  }
+
+  def sliderPanel = new GridPanel(2,2){
     background = mainColor
     contents += new Label {
       text = "number of rounds:"
@@ -263,14 +291,17 @@ class Gui(controller:ControllerInterface) extends Frame {
     }
     vGap = 10
     contents += slider
+    contents += emptyLabel
+    contents += playButton
   }
 
   val secondSmainPanel = new GridPanel(2,1) {
     border = BorderFactory.createEmptyBorder(0,0,0,0)
     vGap = 10
+    background = mainColor
+
     contents += setNamesPanel
     contents += sliderPanel
-    background = mainColor
   }
 
   val secondSxButton = new Button{
@@ -304,9 +335,29 @@ class Gui(controller:ControllerInterface) extends Frame {
     contents += secondSxButton
   }
 
+  val secondSbackButton = new Button{
+    text = "back"
+    foreground = blueGrey
+    focusPainted = false
+    font = xFont
+
+    this.opaque = false
+    this.contentAreaFilled = false
+    this.borderPainted = false
+
+    //hover effect:
+    listenTo(mouse.moves)
+    reactions += {
+      case MouseEntered(_, _, _) =>
+        foreground = mainColor
+      case MouseExited(_, _, _) =>
+        foreground = blueGrey
+    }
+  }
+
   val secondSaudioButton = new Button{
     text = "\uD83D\uDD0A"
-    foreground= blueGrey
+    foreground = blueGrey
     focusPainted = false
     font = font.deriveFont(1, 30)
 
@@ -338,7 +389,7 @@ class Gui(controller:ControllerInterface) extends Frame {
   }
 
   val secondSbelowPanel = new GridPanel(1,3) {
-    contents += emptyLabel
+    contents += secondSbackButton
     contents += emptyLabel
     contents += secondSaudioButton
   }
@@ -355,7 +406,131 @@ class Gui(controller:ControllerInterface) extends Frame {
   }
 
   //--------------------------------------------------------------------------------------
+  //-----------------------------------------------------------third screen (play tic-tac-toe):
 
+  def matchfieldPanel = new GridPanel(3,3){
+    background = mainColor
+    for{
+      row <- 0 until 3
+      col <- 0 until 3
+    }{
+      val fieldPanel = new FieldPanel(row, col, controller)
+      fields(row)(col) = fieldPanel
+      contents += fieldPanel
+
+      listenTo(fieldPanel)
+      reactions += {
+        case ButtonClicked(`fieldPanel`) =>
+          listenTo(controller)
+          controller.handle("s" + row.toString + col.toString)
+          fieldPanel.redraw
+      }
+    }
+  }
+
+  def redraw: Unit = {
+    for {
+      row <- 0 until 3
+      column <- 0 until 3
+    } fields(row)(column).redraw
+
+    repaint
+  }
+
+  val thirdSmainPanel = new GridPanel(2,1) {
+    border = BorderFactory.createEmptyBorder(0,0,0,0)
+    vGap = 10
+    background = mainColor
+
+    contents += matchfieldPanel
+    contents += emptyLabel
+  }
+
+  val thirdSxButton = new Button{
+    text = "X"
+    font = xFont
+    foreground= blueGrey
+    focusPainted = false
+
+    this.opaque = false
+    this.contentAreaFilled = false
+    this.borderPainted = false
+
+    //hover effect:
+    listenTo(mouse.moves)
+    reactions += {
+      case MouseEntered(_, _, _) =>
+        foreground = Color.RED
+      case MouseExited(_, _, _) =>
+        foreground = blueGrey
+    }
+  }
+  listenTo(thirdSxButton)
+  reactions += {
+    case ButtonClicked(`thirdSxButton`) =>
+      System.exit(0)
+  }
+
+  val thirdSabovePanel = new GridPanel(1,3) {
+    contents += emptyLabel
+    contents += tttLabel
+    contents += thirdSxButton
+  }
+
+  val thirdSaudioButton = new Button{
+    text = "\uD83D\uDD0A"
+    foreground = blueGrey
+    focusPainted = false
+    font = font.deriveFont(1, 30)
+
+    this.opaque = false
+    this.contentAreaFilled = false
+    this.borderPainted = false
+
+    //hover effect:
+    listenTo(mouse.moves)
+    reactions += {
+      case MouseEntered(_, _, _) =>
+        foreground = Color.ORANGE
+      case MouseExited(_, _, _) =>
+        foreground = blueGrey
+    }
+  }
+  listenTo(thirdSaudioButton)
+  reactions += {
+    case ButtonClicked(`thirdSaudioButton`) =>
+      if(soundIsOn){
+        clipMusic.stop
+        thirdSaudioButton.text = "\uD83D\uDD07"
+        soundIsOn = false
+      } else{
+        clipMusic.loop(Clip.LOOP_CONTINUOUSLY)
+        thirdSaudioButton.text = "\uD83D\uDD0A"
+        soundIsOn = true
+      }
+  }
+
+  val thirdSbelowPanel = new GridPanel(1,3) {
+    contents += emptyLabel
+    contents += emptyLabel
+    contents += thirdSaudioButton
+  }
+
+  val thirdScreenPanel = new GridBagPanel {
+    border = BorderFactory.createEmptyBorder(50,50,0,50)
+
+    add(thirdSabovePanel, new Constraints(0,0,1,1,0.0,0.0,GridBagConstraints.FIRST_LINE_START,GridBagConstraints.BOTH,
+      new Insets(0,0,10,0),0,0))
+    add(thirdSmainPanel, new Constraints(0,1,1,1,0.0,0.0,GridBagConstraints.FIRST_LINE_START,GridBagConstraints.BOTH,
+      new Insets(0,0,0,0),900,500))
+    add(thirdSbelowPanel, new Constraints(0,2,1,1,0.0,0.0,GridBagConstraints.FIRST_LINE_START,GridBagConstraints.BOTH,
+      new Insets(10,0,0,0),0,0))
+  }
+
+  //--------------------------------------------------------------------------------------
+  //listen to buttons:
+
+  //of first screen:
   listenTo(newGameButton)
   reactions += {
     case ButtonClicked(`newGameButton`) =>
@@ -375,6 +550,47 @@ class Gui(controller:ControllerInterface) extends Frame {
       //sets screen to max
       peer.setExtendedState(AWTFrame.MAXIMIZED_BOTH)
       //peer.setUndecorated(true)
+  }
+
+  //of second screen:
+  listenTo(secondSbackButton)
+  reactions += {
+    case ButtonClicked(`secondSbackButton`) =>
+      //update audio:
+      if(!soundIsOn){
+        audioButton.text = "\uD83D\uDD07"
+      } else{
+        audioButton.text = "\uD83D\uDD0A"
+      }
+
+      //new Screen:
+      contents = firstScreenPanel
+
+      //sets screen to max
+      peer.setExtendedState(AWTFrame.MAXIMIZED_BOTH)
+    //peer.setUndecorated(true)
+  }
+
+  listenTo(playButton)
+  reactions += {
+    case ButtonClicked(`playButton`) =>
+      listenTo(controller)
+      controller.handle(player1TextField.text + " " + player2TextField.text)
+      controller.handle(slider.value.toString)
+
+      //update audio:
+      if(!soundIsOn){
+        thirdSaudioButton.text = "\uD83D\uDD07"
+      } else{
+        thirdSaudioButton.text = "\uD83D\uDD0A"
+      }
+
+      //new Screen:
+      contents = thirdScreenPanel
+
+      //sets screen to max
+      peer.setExtendedState(AWTFrame.MAXIMIZED_BOTH)
+    //peer.setUndecorated(true)
   }
 
   contents = firstScreenPanel

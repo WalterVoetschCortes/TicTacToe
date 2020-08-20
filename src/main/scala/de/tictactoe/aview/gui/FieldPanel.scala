@@ -15,6 +15,8 @@ class FieldPanel (row:Int, col: Int, controller: ControllerInterface) extends Bu
   foreground = Color.BLUE
   border = new LineBorder(Color.LIGHT_GRAY, 2)
   background = Color.WHITE
+  focusPainted = false
+
 
 
   def fieldText(row:Int, col:Int): String ={

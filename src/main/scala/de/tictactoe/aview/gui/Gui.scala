@@ -2,7 +2,7 @@ package de.tictactoe.aview.gui
 
 import java.awt.{Color, Font, GridBagConstraints, Insets}
 
-import de.tictactoe.controller.controllerComponent.ControllerInterface
+import de.tictactoe.controller.controllerComponent.{ControllerInterface, NewRound, PlayerChanged, PlayerSwitch}
 import javax.swing.{BorderFactory, WindowConstants}
 
 import scala.swing.{Button, Dimension, Frame, GridBagPanel, GridPanel, Label, Slider, TextField}
@@ -437,13 +437,43 @@ class Gui(controller:ControllerInterface) extends Frame {
     repaint
   }
 
+  val turnInfoLabel = new Label{
+    text = "player1, it's your turn!"
+    background = mainColor
+    foreground= Color.WHITE
+    font = xFont
+  }
+
+  val player1InfoLabel = new Label{
+    text = "player1 Label"
+    background = mainColor
+    foreground= Color.WHITE
+    font = xFont
+  }
+
+  val player2InfoLabel = new Label{
+    text = "player2 Label"
+    background = mainColor
+    foreground= Color.WHITE
+    font = xFont
+  }
+
+  def infoPanel = new GridPanel(2,2){
+    border = BorderFactory.createEmptyBorder(0,0,0,0)
+    background = mainColor
+
+    contents += player1InfoLabel
+    contents += player2InfoLabel
+    contents += turnInfoLabel
+  }
+
   val thirdSmainPanel = new GridPanel(2,1) {
     border = BorderFactory.createEmptyBorder(0,0,0,0)
     vGap = 10
     background = mainColor
 
     contents += matchfieldPanel
-    contents += emptyLabel
+    contents += infoPanel
   }
 
   val thirdSxButton = new Button{
@@ -574,24 +604,52 @@ class Gui(controller:ControllerInterface) extends Frame {
   listenTo(playButton)
   reactions += {
     case ButtonClicked(`playButton`) =>
-      listenTo(controller)
-      controller.handle(player1TextField.text + " " + player2TextField.text)
-      controller.handle(slider.value.toString)
+      if(!player1TextField.text.isEmpty || !player2TextField.text.isEmpty){
+        listenTo(controller)
+        controller.handle(player1TextField.text + " " + player2TextField.text)
+        controller.handle(slider.value.toString)
 
-      //update audio:
-      if(!soundIsOn){
-        thirdSaudioButton.text = "\uD83D\uDD07"
-      } else{
-        thirdSaudioButton.text = "\uD83D\uDD0A"
+        //update audio:
+        if(!soundIsOn){
+          thirdSaudioButton.text = "\uD83D\uDD07"
+        } else{
+          thirdSaudioButton.text = "\uD83D\uDD0A"
+        }
+
+        //new Screen:
+        contents = thirdScreenPanel
+
+        //sets screen to max
+        peer.setExtendedState(AWTFrame.MAXIMIZED_BOTH)
+        //peer.setUndecorated(true)
+
+        repaint
       }
-
-      //new Screen:
-      contents = thirdScreenPanel
-
-      //sets screen to max
-      peer.setExtendedState(AWTFrame.MAXIMIZED_BOTH)
-    //peer.setUndecorated(true)
   }
+
+  //-----------------
+  //reactions:
+  reactions += {
+    case event: PlayerChanged =>
+      //update infoLabels in third screen:
+      player1InfoLabel.text = "X - " + controller.playerList(0).name + " - " + controller.player0Score.toString
+      player2InfoLabel.text = "O - " + controller.playerList(1).name + " - " + controller.player1Score.toString
+      turnInfoLabel.text = controller.playerList(controller.currentPlayerIndex).name + ", it's your turn!"
+      repaint
+
+    case event: PlayerSwitch =>
+      //update infoLabel in third screen:
+      turnInfoLabel.text = controller.playerList(controller.currentPlayerIndex).name + ", it's your turn!"
+
+    case event: NewRound =>
+      //update infoLabels in third screen:
+      player1InfoLabel.text = "X - " + controller.playerList(0).name + " - " + controller.player0Score.toString
+      player2InfoLabel.text = "O - " + controller.playerList(1).name + " - " + controller.player1Score.toString
+
+      //clear fields:
+
+  }
+
 
   contents = firstScreenPanel
 

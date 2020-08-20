@@ -178,7 +178,6 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
         }
       }
     }
-
     false
   }
 

@@ -3,9 +3,9 @@ package de.tictactoe.aview.gui
 import java.awt.{Color, Font, GridBagConstraints, Insets}
 
 import de.tictactoe.controller.controllerComponent.{ControllerInterface, NewRound, PlayerChanged, PlayerSwitch}
-import javax.swing.{BorderFactory, WindowConstants}
+import javax.swing.{BorderFactory, JLabel, WindowConstants}
 
-import scala.swing.{Button, Dimension, Frame, GridBagPanel, GridPanel, Label, Slider, TextField}
+import scala.swing.{BorderPanel, Button, Dimension, FlowPanel, Frame, GridBagPanel, GridPanel, Label, Panel, Slider, TextField}
 import java.awt.{Frame => AWTFrame}
 import java.io.File
 
@@ -48,8 +48,8 @@ class Gui(controller:ControllerInterface) extends Frame {
   clipSound.open(audioInSound)
 
   //colors:
-  val mainColor = new Color(61,124,179)
-  val blueGrey = new Color(122,159,179)
+  val mainColor = new Color(20, 189, 172)
+  val grey = new Color(155, 169, 181)
 
   //fonts:
   val tttFont = new Font("Calibri Light", Font.ITALIC, 30)
@@ -61,51 +61,55 @@ class Gui(controller:ControllerInterface) extends Frame {
   //-----------------------------------------------------------------------
   //------------------------------- --------------------first screen (menu with new game or load game):
   val newGameButton = new Button{
+    //border = BorderFactory.createEmptyBorder(50,50,0,50)
+    border = new RoundedBorder(mainColor,2,16,0)
     text = "NEW GAME"
     font = menuFont
     background = mainColor
     foreground= Color.WHITE
     focusPainted = false
 
-    this.borderPainted = false
+    //this.borderPainted = false
 
     //hover effect:
     listenTo(mouse.moves)
     reactions += {
       case MouseEntered(_, _, _) =>
         clipSound.loop(1)
-        background = blueGrey
+        background = grey
       case MouseExited(_, _, _) =>
         background = mainColor
     }
   }
 
   val loadGameButton = new Button{
+    //border = BorderFactory.createEmptyBorder(0,50,50,50)
+    border = new RoundedBorder(mainColor,2,16,0)
     text = "LOAD GAME"
     font = menuFont
     background = mainColor
     foreground= Color.WHITE
     focusPainted = false
 
-    this.borderPainted = false
+    //this.borderPainted = false
 
     //hover effect:
     listenTo(mouse.moves)
     reactions += {
       case MouseEntered(_, _, _) =>
         clipSound.loop(1)
-        background = blueGrey
+        background = grey
       case MouseExited(_, _, _) =>
         background = mainColor
     }
   }
 
-  val mainPanel = new GridPanel(2,1) {
-    border = BorderFactory.createEmptyBorder(0,0,0,0)
-    vGap = 10
-
-    contents += newGameButton
-    contents += loadGameButton
+  val mainPanel = new GridBagPanel{
+    border = new RoundedBorder(grey,2,16,0)
+    add(newGameButton,new Constraints(0,0,1,1,1.0,1.0,GridBagConstraints.CENTER,GridBagConstraints.BOTH,
+      new Insets(30,30,10,30),0,0))
+    add(loadGameButton,new Constraints(0,1,1,1,1.0,1.0,GridBagConstraints.CENTER,GridBagConstraints.BOTH,
+      new Insets(0,30,30,30),0,0))
   }
 
   def emptyLabel = new Label{
@@ -114,7 +118,7 @@ class Gui(controller:ControllerInterface) extends Frame {
 
   def tttLabel = new Label{
     text = "TicTacToe"
-    foreground= blueGrey
+    foreground= grey
     font = tttFont
     //horizontalAlignment =
   }
@@ -122,7 +126,7 @@ class Gui(controller:ControllerInterface) extends Frame {
   val xButton = new Button{
     text = "X"
     font = xFont
-    foreground= blueGrey
+    foreground= grey
     focusPainted = false
 
     this.opaque = false
@@ -135,7 +139,7 @@ class Gui(controller:ControllerInterface) extends Frame {
       case MouseEntered(_, _, _) =>
         foreground = Color.RED
       case MouseExited(_, _, _) =>
-        foreground = blueGrey
+        foreground = grey
     }
   }
 
@@ -153,7 +157,7 @@ class Gui(controller:ControllerInterface) extends Frame {
 
   val audioButton = new Button{
     text = "\uD83D\uDD0A"
-    foreground= blueGrey
+    foreground= grey
     focusPainted = false
     font = font.deriveFont(1, 30)
 
@@ -167,7 +171,7 @@ class Gui(controller:ControllerInterface) extends Frame {
       case MouseEntered(_, _, _) =>
         foreground = Color.ORANGE
       case MouseExited(_, _, _) =>
-        foreground = blueGrey
+        foreground = grey
     }
   }
   listenTo(audioButton)
@@ -205,32 +209,32 @@ class Gui(controller:ControllerInterface) extends Frame {
   //-----------------------------------------------------------second screen (set player names and rounds):
 
   val player1TextField = new TextField("", 10){
-    foreground= blueGrey
+    foreground= grey
     font = setNamesFont
     border = BorderFactory.createEmptyBorder(0,10,0,0)
     preferredSize = new Dimension(100,50)
   }
 
   val player2TextField = new TextField("", 10){
-    foreground= blueGrey
+    foreground= grey
     font = setNamesFont
     border = BorderFactory.createEmptyBorder(0,10,0,0)
     preferredSize = new Dimension(100,50)
   }
 
   def setNamesPanel = new GridPanel(2,2){
-    border = BorderFactory.createEmptyBorder(50,0,50,50)
-    background = mainColor
+    //border = BorderFactory.createEmptyBorder(50,0,50,50)
+    //background = mainColor
     contents += new Label {
       text = "Player 1:"
-      foreground= Color.WHITE
+      foreground= mainColor
       font = playersFont
     }
     contents += player1TextField
     vGap = 10
     contents += new Label {
       text = "Player 2:"
-      foreground= Color.WHITE
+      foreground= mainColor
       font = playersFont
     }
     contents += player2TextField
@@ -238,13 +242,13 @@ class Gui(controller:ControllerInterface) extends Frame {
 
   //slider to choose number of rounds
   val slider = new Slider{
-    border = BorderFactory.createEmptyBorder(0,0,0,50)
-    background = mainColor
-    labels = Map(1-> new Label{text = "1"; foreground= Color.WHITE},2-> new Label{text = "2"; foreground= Color.WHITE},
-            3-> new Label{text = "3"; foreground= Color.WHITE},4-> new Label{text = "4"; foreground= Color.WHITE},
-            5-> new Label{text = "5"; foreground= Color.WHITE},6-> new Label{text = "6"; foreground= Color.WHITE},
-            7-> new Label{text = "7"; foreground= Color.WHITE},8-> new Label{text = "8"; foreground= Color.WHITE},
-            9-> new Label{text = "9"; foreground= Color.WHITE}, 10-> new Label{text = "10"; foreground= Color.WHITE})
+    //border = BorderFactory.createEmptyBorder(0,0,0,50)
+    //background = mainColor
+    labels = Map(1-> new Label{text = "1"; foreground= mainColor},2-> new Label{text = "2"; foreground= mainColor},
+            3-> new Label{text = "3"; foreground= mainColor},4-> new Label{text = "4"; foreground= mainColor},
+            5-> new Label{text = "5"; foreground= mainColor},6-> new Label{text = "6"; foreground= mainColor},
+            7-> new Label{text = "7"; foreground= mainColor},8-> new Label{text = "8"; foreground= mainColor},
+            9-> new Label{text = "9"; foreground= mainColor}, 10-> new Label{text = "10"; foreground= mainColor})
     min = 1
     max = 10
     value = 1
@@ -256,37 +260,39 @@ class Gui(controller:ControllerInterface) extends Frame {
     paintLabels = true
     snapToTicks = true
 
-    foreground = Color.WHITE
+    foreground = mainColor
 
     visible = true
   }
 
   val playButton = new Button{
+    border = new RoundedBorder(mainColor,2,16,0)
     background = mainColor
     text = "play"
     foreground = Color.WHITE
     focusPainted = false
     font = xFont
 
-    this.opaque = false
-    this.contentAreaFilled = false
-    this.borderPainted = false
+    //this.opaque = false
+    //this.contentAreaFilled = false
+    //this.borderPainted = false
 
     //hover effect:
     listenTo(mouse.moves)
     reactions += {
       case MouseEntered(_, _, _) =>
-        foreground = blueGrey
+        clipSound.loop(1)
+        background = grey
       case MouseExited(_, _, _) =>
-        foreground = Color.WHITE
+        background = mainColor
     }
   }
 
   def sliderPanel = new GridPanel(2,2){
-    background = mainColor
+    //background = mainColor
     contents += new Label {
       text = "number of rounds:"
-      foreground= Color.WHITE
+      foreground= mainColor
       font = playersFont
     }
     vGap = 10
@@ -295,19 +301,19 @@ class Gui(controller:ControllerInterface) extends Frame {
     contents += playButton
   }
 
-  val secondSmainPanel = new GridPanel(2,1) {
-    border = BorderFactory.createEmptyBorder(0,0,0,0)
-    vGap = 10
-    background = mainColor
+  val secondSmainPanel = new GridBagPanel {
+    border = new RoundedBorder(grey,2,16,0)
 
-    contents += setNamesPanel
-    contents += sliderPanel
+    add(setNamesPanel,new Constraints(0,0,1,1,1.0,1.0,GridBagConstraints.CENTER,GridBagConstraints.BOTH,
+      new Insets(30,30,10,30),0,0))
+    add(sliderPanel,new Constraints(0,1,1,1,1.0,1.0,GridBagConstraints.CENTER,GridBagConstraints.BOTH,
+      new Insets(0,30,30,30),0,0))
   }
 
   val secondSxButton = new Button{
     text = "X"
     font = xFont
-    foreground= blueGrey
+    foreground= grey
     focusPainted = false
 
     this.opaque = false
@@ -320,7 +326,7 @@ class Gui(controller:ControllerInterface) extends Frame {
       case MouseEntered(_, _, _) =>
         foreground = Color.RED
       case MouseExited(_, _, _) =>
-        foreground = blueGrey
+        foreground = grey
     }
   }
   listenTo(secondSxButton)
@@ -337,7 +343,7 @@ class Gui(controller:ControllerInterface) extends Frame {
 
   val secondSbackButton = new Button{
     text = "back"
-    foreground = blueGrey
+    foreground = grey
     focusPainted = false
     font = xFont
 
@@ -349,15 +355,16 @@ class Gui(controller:ControllerInterface) extends Frame {
     listenTo(mouse.moves)
     reactions += {
       case MouseEntered(_, _, _) =>
+        clipSound.loop(1)
         foreground = mainColor
       case MouseExited(_, _, _) =>
-        foreground = blueGrey
+        foreground = grey
     }
   }
 
   val secondSaudioButton = new Button{
     text = "\uD83D\uDD0A"
-    foreground = blueGrey
+    foreground = grey
     focusPainted = false
     font = font.deriveFont(1, 30)
 
@@ -371,7 +378,7 @@ class Gui(controller:ControllerInterface) extends Frame {
       case MouseEntered(_, _, _) =>
         foreground = Color.ORANGE
       case MouseExited(_, _, _) =>
-        foreground = blueGrey
+        foreground = grey
     }
   }
   listenTo(secondSaudioButton)
@@ -409,6 +416,7 @@ class Gui(controller:ControllerInterface) extends Frame {
   //-----------------------------------------------------------third screen (play tic-tac-toe):
 
   def matchfieldPanel = new GridPanel(3,3){
+    //border = BorderFactory.createEmptyBorder(20,200,20,200)
     background = mainColor
     for{
       row <- 0 until 3
@@ -439,47 +447,50 @@ class Gui(controller:ControllerInterface) extends Frame {
 
   val turnInfoLabel = new Label{
     text = "player1, it's your turn!"
-    background = mainColor
-    foreground= Color.WHITE
+    //background = mainColor
+    foreground= mainColor
     font = xFont
   }
 
   val player1InfoLabel = new Label{
     text = "player1 Label"
-    background = mainColor
-    foreground= Color.WHITE
+    //background = mainColor
+    foreground= mainColor
     font = xFont
   }
 
   val player2InfoLabel = new Label{
     text = "player2 Label"
-    background = mainColor
-    foreground= Color.WHITE
+    //background = mainColor
+    foreground= mainColor
     font = xFont
   }
 
-  def infoPanel = new GridPanel(2,2){
-    border = BorderFactory.createEmptyBorder(0,0,0,0)
-    background = mainColor
-
-    contents += player1InfoLabel
-    contents += player2InfoLabel
-    contents += turnInfoLabel
+  def infoPanel = new GridBagPanel {
+    add(turnInfoLabel,new Constraints(0,0,GridBagConstraints.RELATIVE,GridBagConstraints.RELATIVE,1.0,1.0,
+      GridBagConstraints.CENTER,GridBagConstraints.BOTH,
+      new Insets(0,0,0,0),0,0))
+    add(player1InfoLabel,new Constraints(0,1,GridBagConstraints.RELATIVE,GridBagConstraints.RELATIVE,1.0,1.0,
+      GridBagConstraints.CENTER,GridBagConstraints.BOTH,
+      new Insets(0,0,0,0),0,0))
+    add(player2InfoLabel,new Constraints(1,1,GridBagConstraints.RELATIVE,GridBagConstraints.RELATIVE,1.0,1.0,
+      GridBagConstraints.CENTER,GridBagConstraints.BOTH,
+      new Insets(0,0,0,0),0,0))
   }
 
-  val thirdSmainPanel = new GridPanel(2,1) {
-    border = BorderFactory.createEmptyBorder(0,0,0,0)
-    vGap = 10
-    background = mainColor
+  val thirdSmainPanel = new GridBagPanel {
+    border = new RoundedBorder(grey,2,16,0)
 
-    contents += matchfieldPanel
-    contents += infoPanel
+    add(matchfieldPanel,new Constraints(0,0,1,1,0.0,1.0,GridBagConstraints.CENTER,GridBagConstraints.BOTH,
+      new Insets(30,0,10,0),0,0))
+    add(infoPanel,new Constraints(0,1,1,1,1.0,1.0,GridBagConstraints.CENTER,GridBagConstraints.BOTH,
+      new Insets(0,30,30,30),0,0))
   }
 
   val thirdSxButton = new Button{
     text = "X"
     font = xFont
-    foreground= blueGrey
+    foreground= grey
     focusPainted = false
 
     this.opaque = false
@@ -492,7 +503,7 @@ class Gui(controller:ControllerInterface) extends Frame {
       case MouseEntered(_, _, _) =>
         foreground = Color.RED
       case MouseExited(_, _, _) =>
-        foreground = blueGrey
+        foreground = grey
     }
   }
   listenTo(thirdSxButton)
@@ -509,7 +520,7 @@ class Gui(controller:ControllerInterface) extends Frame {
 
   val thirdSaudioButton = new Button{
     text = "\uD83D\uDD0A"
-    foreground = blueGrey
+    foreground = grey
     focusPainted = false
     font = font.deriveFont(1, 30)
 
@@ -523,7 +534,7 @@ class Gui(controller:ControllerInterface) extends Frame {
       case MouseEntered(_, _, _) =>
         foreground = Color.ORANGE
       case MouseExited(_, _, _) =>
-        foreground = blueGrey
+        foreground = grey
     }
   }
   listenTo(thirdSaudioButton)
@@ -647,7 +658,12 @@ class Gui(controller:ControllerInterface) extends Frame {
       player2InfoLabel.text = "O - " + controller.playerList(1).name + " - " + controller.player1Score.toString
 
       //clear fields:
-
+      for{
+        row <- 0 until 3
+        col <- 0 until 3
+      }{
+        fields(row)(col).redraw
+      }
   }
 
 

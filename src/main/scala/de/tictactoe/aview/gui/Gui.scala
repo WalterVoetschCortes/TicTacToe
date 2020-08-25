@@ -1,5 +1,6 @@
 package de.tictactoe.aview.gui
 
+import java.awt.event.ActionEvent
 import java.awt.{Color, Font, GridBagConstraints, Insets}
 
 import de.tictactoe.controller.controllerComponent.{ControllerInterface, NewRound, PlayerChanged, PlayerSwitch}
@@ -8,9 +9,11 @@ import javax.swing.{BorderFactory, JLabel, WindowConstants}
 import scala.swing.{BorderPanel, Button, Dimension, FlowPanel, Frame, GridBagPanel, GridPanel, Label, Panel, Slider, TextField}
 import java.awt.{Frame => AWTFrame}
 import java.io.File
+import java.util.{Timer, TimerTask}
 
 import scala.swing.event.{ButtonClicked, MouseEntered, MouseExited}
 import javax.sound.sampled._
+import java.awt.event.ActionListener
 
 import scala.collection.mutable
 
@@ -452,28 +455,76 @@ class Gui(controller:ControllerInterface) extends Frame {
     font = xFont
   }
 
-  val player1InfoLabel = new Label{
-    text = "player1 Label"
+  val player1InfoName = new Label{
+    text = "Player1"
     //background = mainColor
     foreground= mainColor
     font = xFont
   }
 
-  val player2InfoLabel = new Label{
-    text = "player2 Label"
+  val player1InfoScore = new Label{
+    text = "0"
     //background = mainColor
     foreground= mainColor
     font = xFont
+  }
+
+  val player1InfoPanel = new GridPanel(2,1){
+    contents+= player1InfoName
+    contents+= player1InfoScore
+  }
+
+  val player2InfoName = new Label{
+    text = "Player2"
+    //background = mainColor
+    foreground= mainColor
+    font = xFont
+  }
+
+  val player2InfoScore = new Label{
+    text = "0"
+    //background = mainColor
+    foreground= mainColor
+    font = xFont
+  }
+
+  /*
+  val blinkTimerP1 = new Timer(500, new ActionListener() {
+    private var count = 0
+    private val maxCount = 4
+    private var on = false
+    def actionPerformed(e: ActionEvent): Unit
+    =
+    {
+      if (count >= maxCount) {
+        player1InfoScore.text = ""
+        (e.getSource.asInstanceOf[Timer]).cancel()
+      }
+      else {
+        if(on){
+          player1InfoScore.text= controller.player0Score.toString
+        }
+        on = !on
+        count += 1
+      }
+    }
+  })
+
+
+   */
+  val player2InfoPanel = new GridPanel(2,1){
+    contents+= player2InfoName
+    contents+= player2InfoScore
   }
 
   def infoPanel = new GridBagPanel {
-    add(turnInfoLabel,new Constraints(0,0,GridBagConstraints.RELATIVE,GridBagConstraints.RELATIVE,1.0,1.0,
+    add(turnInfoLabel,new Constraints(0,0,3,1,1.0,0.0,
       GridBagConstraints.CENTER,GridBagConstraints.BOTH,
       new Insets(0,0,0,0),0,0))
-    add(player1InfoLabel,new Constraints(0,1,GridBagConstraints.RELATIVE,GridBagConstraints.RELATIVE,1.0,1.0,
+    add(player1InfoPanel,new Constraints(0,1,1,1,1.0,1.0,
       GridBagConstraints.CENTER,GridBagConstraints.BOTH,
       new Insets(0,0,0,0),0,0))
-    add(player2InfoLabel,new Constraints(1,1,GridBagConstraints.RELATIVE,GridBagConstraints.RELATIVE,1.0,1.0,
+    add(player2InfoPanel,new Constraints(1,1,1,1,1.0,1.0,
       GridBagConstraints.CENTER,GridBagConstraints.BOTH,
       new Insets(0,0,0,0),0,0))
   }
@@ -643,8 +694,8 @@ class Gui(controller:ControllerInterface) extends Frame {
   reactions += {
     case event: PlayerChanged =>
       //update infoLabels in third screen:
-      player1InfoLabel.text = "X - " + controller.playerList(0).name + " - " + controller.player0Score.toString
-      player2InfoLabel.text = "O - " + controller.playerList(1).name + " - " + controller.player1Score.toString
+      player1InfoName.text = controller.playerList(0).name
+      player2InfoName.text = controller.playerList(1).name
       turnInfoLabel.text = controller.playerList(controller.currentPlayerIndex).name + ", it's your turn!"
       repaint
 
@@ -654,8 +705,9 @@ class Gui(controller:ControllerInterface) extends Frame {
 
     case event: NewRound =>
       //update infoLabels in third screen:
-      player1InfoLabel.text = "X - " + controller.playerList(0).name + " - " + controller.player0Score.toString
-      player2InfoLabel.text = "O - " + controller.playerList(1).name + " - " + controller.player1Score.toString
+      player1InfoScore.text = controller.player0Score.toString
+      player2InfoScore.text = controller.player1Score.toString
+
 
       //clear fields:
       for{

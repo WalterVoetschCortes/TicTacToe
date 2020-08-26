@@ -38,6 +38,7 @@ class PlayerChanged extends Event
 class GameFinishedWinner extends Event
 class RoundFinishedDraw extends Event
 class PlayerSwitch extends Event
-class NewRound extends Event
+class RoundFinishedWin extends Event
 class ScoreChanged extends Event
+class NewRound extends Event
 

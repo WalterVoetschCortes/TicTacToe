@@ -2,7 +2,7 @@ package de.tictactoe.controller.controllerComponent.controllerBaseImpl
 
 import com.google.inject.{Guice, Inject}
 import de.tictactoe.TicTacToeModule
-import de.tictactoe.controller.controllerComponent.{ControllerInterface, FieldChanged, GameFinishedWinner, NewGame, NewRound, PlayerChanged, PlayerSwitch, RoundFinishedDraw, ScoreChanged}
+import de.tictactoe.controller.controllerComponent.{ControllerInterface, FieldChanged, GameFinishedWinner, NewGame, NewRound, PlayerChanged, PlayerSwitch, RoundFinishedDraw, RoundFinishedWin, ScoreChanged}
 import de.tictactoe.model.gameboardComponent.GameboardInterface
 import de.tictactoe.model.gameboardComponent.gameboardBaseImpl.{Field, Gameboard, Matrix}
 import de.tictactoe.model.playerComponent.Player
@@ -87,9 +87,8 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
     setCount = 0
     gameboard= new Gameboard(false)
     currentPlayerIndex=nextPlayer
-    publish(new PlayerSwitch)
     publish(new NewRound)
-
+    publish(new PlayerSwitch)
     ""
   }
 
@@ -209,6 +208,7 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
         createNewGame
         return ""
       }
+      publish(new RoundFinishedWin)
       createNewRound
       return ""
     }

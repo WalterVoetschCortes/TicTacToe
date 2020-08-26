@@ -1,6 +1,6 @@
 package de.tictactoe.aview
 
-import de.tictactoe.controller.controllerComponent.{ControllerInterface, FieldChanged, GameFinishedWinner, NewGame, NewRound, PlayerChanged, PlayerSwitch, RoundFinishedDraw, ScoreChanged}
+import de.tictactoe.controller.controllerComponent.{ControllerInterface, FieldChanged, GameFinishedWinner, NewGame, PlayerChanged, PlayerSwitch, RoundFinishedDraw, RoundFinishedWin, ScoreChanged}
 
 import scala.swing.Reactor
 
@@ -29,7 +29,7 @@ class Tui(controller: ControllerInterface) extends Reactor {
     case event: NewGame =>
       //printTui
       println("Created new game\nPlease enter the names like (player1 player2)")
-    case event: NewRound =>
+    case event: RoundFinishedWin =>
       printTui
       println("New Round! Set your X or O with following input: s row col\n" +
         controller.playerList(controller.currentPlayerIndex).name  +

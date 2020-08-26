@@ -3,13 +3,12 @@ package de.tictactoe.aview.gui
 import java.awt.event.ActionEvent
 import java.awt.{Color, Font, GridBagConstraints, Insets}
 
-import de.tictactoe.controller.controllerComponent.{ControllerInterface, NewRound, PlayerChanged, PlayerSwitch}
-import javax.swing.{BorderFactory, JLabel, WindowConstants}
+import de.tictactoe.controller.controllerComponent.{ControllerInterface, NewRound, PlayerChanged, PlayerSwitch, RoundFinishedDraw, RoundFinishedWin}
+import javax.swing.{BorderFactory, JLabel, Timer, WindowConstants}
 
 import scala.swing.{BorderPanel, Button, Dimension, FlowPanel, Frame, GridBagPanel, GridPanel, Label, Panel, Slider, TextField}
 import java.awt.{Frame => AWTFrame}
 import java.io.File
-import java.util.{Timer, TimerTask}
 
 import scala.swing.event.{ButtonClicked, MouseEntered, MouseExited}
 import javax.sound.sampled._
@@ -49,6 +48,13 @@ class Gui(controller:ControllerInterface) extends Frame {
   val audioInSound = AudioSystem.getAudioInputStream(fileSound)
   val clipSound = AudioSystem.getClip
   clipSound.open(audioInSound)
+
+  //win round sound effects:
+  val resourcesPathSoundRound = getClass.getResource("/RoundWinSound.wav")
+  val fileSoundRound = new File(resourcesPathSoundRound.getFile)
+  val audioInSoundRound = AudioSystem.getAudioInputStream(fileSoundRound)
+  val clipSoundRound = AudioSystem.getClip
+  clipSoundRound.open(audioInSoundRound)
 
   //colors:
   val mainColor = new Color(20, 189, 172)
@@ -469,6 +475,58 @@ class Gui(controller:ControllerInterface) extends Frame {
     font = xFont
   }
 
+  //blink effect on score text of p1
+  val blinkActionListenerP1 = new ActionListener() {
+    var count = 0
+    private val maxCount = 8
+    private var on = false
+    def actionPerformed(e: ActionEvent): Unit
+    =
+    {
+      if (count >= maxCount) {
+        player1InfoScore.text = controller.player0Score.toString
+        (e.getSource.asInstanceOf[Timer]).stop()
+      }
+      else {
+        if(on){
+          player1InfoScore.text= ""
+        }else{
+          player1InfoScore.text= controller.player0Score.toString
+        }
+        on = !on
+        count += 1
+      }
+    }
+  }
+
+  val blinkTimerP1 = new Timer(200, blinkActionListenerP1)
+
+  //blink effect on score text of p1
+  val blinkActionListenerP2 = new ActionListener() {
+    var count = 0
+    private val maxCount = 8
+    private var on = false
+    def actionPerformed(e: ActionEvent): Unit
+    =
+    {
+      if (count >= maxCount) {
+        player2InfoScore.text = controller.player1Score.toString
+        (e.getSource.asInstanceOf[Timer]).stop()
+      }
+      else {
+        if(on){
+          player2InfoScore.text= ""
+        }else{
+          player2InfoScore.text= controller.player1Score.toString
+        }
+        on = !on
+        count += 1
+      }
+    }
+  }
+
+  val blinkTimerP2 = new Timer(200, blinkActionListenerP2)
+
   val player1InfoPanel = new GridPanel(2,1){
     contents+= player1InfoName
     contents+= player1InfoScore
@@ -488,30 +546,6 @@ class Gui(controller:ControllerInterface) extends Frame {
     font = xFont
   }
 
-  /*
-  val blinkTimerP1 = new Timer(500, new ActionListener() {
-    private var count = 0
-    private val maxCount = 4
-    private var on = false
-    def actionPerformed(e: ActionEvent): Unit
-    =
-    {
-      if (count >= maxCount) {
-        player1InfoScore.text = ""
-        (e.getSource.asInstanceOf[Timer]).cancel()
-      }
-      else {
-        if(on){
-          player1InfoScore.text= controller.player0Score.toString
-        }
-        on = !on
-        count += 1
-      }
-    }
-  })
-
-
-   */
   val player2InfoPanel = new GridPanel(2,1){
     contents+= player2InfoName
     contents+= player2InfoScore
@@ -703,21 +737,34 @@ class Gui(controller:ControllerInterface) extends Frame {
       //update infoLabel in third screen:
       turnInfoLabel.text = controller.playerList(controller.currentPlayerIndex).name + ", it's your turn!"
 
-    case event: NewRound =>
+    case event: RoundFinishedWin =>
+      //round win sound effect:
+      clipSoundRound.loop(2)
+
       //update infoLabels in third screen:
       player1InfoScore.text = controller.player0Score.toString
       player2InfoScore.text = controller.player1Score.toString
 
+      //blink effect of score info text:
+      controller.currentPlayerIndex match {
+        case 0 =>
+          blinkTimerP1.start()
+          blinkActionListenerP1.count = 0
+        case 1 =>
+          blinkTimerP2.start()
+          blinkActionListenerP2.count = 0
+      }
 
+
+    case event: NewRound =>
       //clear fields:
-      for{
+      for {
         row <- 0 until 3
         col <- 0 until 3
-      }{
+      } {
         fields(row)(col).redraw
       }
   }
-
 
   contents = firstScreenPanel
 

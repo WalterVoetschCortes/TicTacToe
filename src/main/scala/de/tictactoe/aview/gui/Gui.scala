@@ -4,7 +4,7 @@ import java.awt.event.ActionEvent
 import java.awt.{Color, Font, GridBagConstraints, Insets}
 
 import de.tictactoe.controller.controllerComponent.{ControllerInterface, NewRound, PlayerChanged, PlayerSwitch, RoundFinishedDraw, RoundFinishedWin}
-import javax.swing.{BorderFactory, JLabel, Timer, WindowConstants}
+import javax.swing.{BorderFactory, ImageIcon, JLabel, Timer, WindowConstants}
 
 import scala.swing.{BorderPanel, Button, Dimension, FlowPanel, Frame, GridBagPanel, GridPanel, Label, Panel, Slider, TextField}
 import java.awt.{Frame => AWTFrame}
@@ -13,6 +13,8 @@ import java.io.File
 import scala.swing.event.{ButtonClicked, MouseEntered, MouseExited}
 import javax.sound.sampled._
 import java.awt.event.ActionListener
+
+import javax.imageio.ImageIO
 
 import scala.collection.mutable
 
@@ -55,6 +57,11 @@ class Gui(controller:ControllerInterface) extends Frame {
   val audioInSoundRound = AudioSystem.getAudioInputStream(fileSoundRound)
   val clipSoundRound = AudioSystem.getClip
   clipSoundRound.open(audioInSoundRound)
+
+  //congratulation gif:
+  //val fireworks = ImageIO.read(getClass.getResource("/Confetti.gif"))
+  val fireworksGif = new ImageIcon(getClass.getResource("/Confetti.gif"))
+
 
   //colors:
   val mainColor = new Color(20, 189, 172)
@@ -424,6 +431,10 @@ class Gui(controller:ControllerInterface) extends Frame {
   //--------------------------------------------------------------------------------------
   //-----------------------------------------------------------third screen (play tic-tac-toe):
 
+  def winPanel = new Label{
+    icon = fireworksGif
+  }
+
   def matchfieldPanel = new GridPanel(3,3){
     //border = BorderFactory.createEmptyBorder(20,200,20,200)
     background = mainColor
@@ -566,7 +577,7 @@ class Gui(controller:ControllerInterface) extends Frame {
   val thirdSmainPanel = new GridBagPanel {
     border = new RoundedBorder(grey,2,16,0)
 
-    add(matchfieldPanel,new Constraints(0,0,1,1,0.0,1.0,GridBagConstraints.CENTER,GridBagConstraints.BOTH,
+    add(winPanel,new Constraints(0,0,1,1,0.0,1.0,GridBagConstraints.CENTER,GridBagConstraints.BOTH,
       new Insets(30,0,10,0),0,0))
     add(infoPanel,new Constraints(0,1,1,1,1.0,1.0,GridBagConstraints.CENTER,GridBagConstraints.BOTH,
       new Insets(0,30,30,30),0,0))

@@ -1,13 +1,12 @@
 package de.tictactoe.aview.gui
 
 import java.awt.event.ActionEvent
-import java.awt.{Color, Font, GridBagConstraints, Insets}
+import java.awt.{Color, Font, Graphics, Graphics2D, GridBagConstraints, Insets, Frame => AWTFrame}
 
-import de.tictactoe.controller.controllerComponent.{ControllerInterface, NewRound, PlayerChanged, PlayerSwitch, RoundFinishedDraw, RoundFinishedWin}
+import de.tictactoe.controller.controllerComponent.{ControllerInterface, GameFinishedWinner, NewRound, PlayerChanged, PlayerSwitch, RoundFinishedDraw, RoundFinishedWin}
 import javax.swing.{BorderFactory, ImageIcon, JLabel, Timer, WindowConstants}
 
 import scala.swing.{BorderPanel, Button, Dimension, FlowPanel, Frame, GridBagPanel, GridPanel, Label, Panel, Slider, TextField}
-import java.awt.{Frame => AWTFrame}
 import java.io.File
 
 import scala.swing.event.{ButtonClicked, MouseEntered, MouseExited}
@@ -44,6 +43,13 @@ class Gui(controller:ControllerInterface) extends Frame {
 
   var soundIsOn = true
 
+  //win sound:
+  val resourcesPathWin = getClass.getResource("/DiscoLoop.wav")
+  val fileMusicWin = new File(resourcesPathWin.getFile)
+  val audioInWin = AudioSystem.getAudioInputStream(fileMusicWin)
+  val clipMusicWin = AudioSystem.getClip
+  clipMusicWin.open(audioInWin)
+
   //button sound effects:
   val resourcesPathSound = getClass.getResource("/ButtonHoverSound.wav")
   val fileSound = new File(resourcesPathSound.getFile)
@@ -60,8 +66,10 @@ class Gui(controller:ControllerInterface) extends Frame {
 
   //congratulation gif:
   //val fireworks = ImageIO.read(getClass.getResource("/Confetti.gif"))
-  val fireworksGif = new ImageIcon(getClass.getResource("/Confetti.gif"))
+  val fireworksGif = new ImageIcon(getClass.getResource("/Taddel.gif"))
 
+  //confetti gif:
+  val confettiGif = new ImageIcon(getClass.getResource("/Taddel.gif"))
 
   //colors:
   val mainColor = new Color(20, 189, 172)
@@ -71,7 +79,7 @@ class Gui(controller:ControllerInterface) extends Frame {
   val tttFont = new Font("Calibri Light", Font.ITALIC, 30)
   val xFont = new Font("Calibri Light", Font.BOLD, 30)
   val menuFont = new Font("Calibri Light", Font.BOLD, 60)
-  val playersFont = new Font("Calibri Light", Font.BOLD, 20)
+  val playersFont = new Font("Calibri Light", Font.BOLD, 30)
   val setNamesFont = new Font("Calibri Light", Font.PLAIN, 20)
 
   //-----------------------------------------------------------------------
@@ -431,10 +439,6 @@ class Gui(controller:ControllerInterface) extends Frame {
   //--------------------------------------------------------------------------------------
   //-----------------------------------------------------------third screen (play tic-tac-toe):
 
-  def winPanel = new Label{
-    icon = fireworksGif
-  }
-
   def matchfieldPanel = new GridPanel(3,3){
     //border = BorderFactory.createEmptyBorder(20,200,20,200)
     background = mainColor
@@ -575,12 +579,12 @@ class Gui(controller:ControllerInterface) extends Frame {
   }
 
   val thirdSmainPanel = new GridBagPanel {
-    border = new RoundedBorder(grey,2,16,0)
+    border = new RoundedBorder(grey, 2, 16, 0)
 
-    add(winPanel,new Constraints(0,0,1,1,0.0,1.0,GridBagConstraints.CENTER,GridBagConstraints.BOTH,
-      new Insets(30,0,10,0),0,0))
-    add(infoPanel,new Constraints(0,1,1,1,1.0,1.0,GridBagConstraints.CENTER,GridBagConstraints.BOTH,
-      new Insets(0,30,30,30),0,0))
+    add(matchfieldPanel, new Constraints(0, 0, 1, 1, 0.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+      new Insets(30, 0, 10, 0), 0, 0))
+    add(infoPanel, new Constraints(0, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+      new Insets(0, 30, 0, 30), 0, 0))
   }
 
   val thirdSxButton = new Button{
@@ -665,6 +669,136 @@ class Gui(controller:ControllerInterface) extends Frame {
   }
 
   //--------------------------------------------------------------------------------------
+  //-----------------------------------------------------------fourth screen (win tic-tac-toe):
+
+  val winLabel = new Label{
+    icon = fireworksGif
+  }
+
+  def confettiLabel = new Label{
+    icon = confettiGif
+  }
+
+  val winnerNameLabel = new Label{
+    text = "You're the winner!"
+    font = playersFont
+    foreground = mainColor
+  }
+
+  val fourthSmainPanel = new GridBagPanel {
+    border = new RoundedBorder(grey,2,16,0)
+
+    add(winLabel,new Constraints(0,0,1,1,0.0,1.0,GridBagConstraints.CENTER,GridBagConstraints.BOTH,
+      new Insets(0,0,0,0),0,0))
+    add(winnerNameLabel,new Constraints(0,1,1,1,1.0,1.0,GridBagConstraints.CENTER,GridBagConstraints.BOTH,
+      new Insets(0,0,0,0),0,0))
+
+
+  }
+
+  val fourthSxButton = new Button{
+    text = "X"
+    font = xFont
+    foreground= grey
+    focusPainted = false
+
+    this.opaque = false
+    this.contentAreaFilled = false
+    this.borderPainted = false
+
+    //hover effect:
+    listenTo(mouse.moves)
+    reactions += {
+      case MouseEntered(_, _, _) =>
+        foreground = Color.RED
+      case MouseExited(_, _, _) =>
+        foreground = grey
+    }
+  }
+  listenTo(fourthSxButton)
+  reactions += {
+    case ButtonClicked(`fourthSxButton`) =>
+      System.exit(0)
+  }
+
+  val fourthSabovePanel = new GridPanel(1,3) {
+    contents += emptyLabel
+    contents += tttLabel
+    contents += thirdSxButton
+  }
+
+  val fourthSaudioButton = new Button{
+    text = "\uD83D\uDD0A"
+    foreground = grey
+    focusPainted = false
+    font = font.deriveFont(1, 30)
+
+    this.opaque = false
+    this.contentAreaFilled = false
+    this.borderPainted = false
+
+    //hover effect:
+    listenTo(mouse.moves)
+    reactions += {
+      case MouseEntered(_, _, _) =>
+        foreground = Color.ORANGE
+      case MouseExited(_, _, _) =>
+        foreground = grey
+    }
+  }
+  listenTo(fourthSaudioButton)
+  reactions += {
+    case ButtonClicked(`fourthSaudioButton`) =>
+      if(soundIsOn){
+        clipMusic.stop
+        fourthSaudioButton.text = "\uD83D\uDD07"
+        soundIsOn = false
+      } else{
+        clipMusic.loop(Clip.LOOP_CONTINUOUSLY)
+        fourthSaudioButton.text = "\uD83D\uDD0A"
+        soundIsOn = true
+      }
+  }
+
+  val fourthSMenuButton = new Button{
+    text = "MENU"
+    foreground = grey
+    focusPainted = false
+    font = xFont
+
+    this.opaque = false
+    this.contentAreaFilled = false
+    this.borderPainted = false
+
+    //hover effect:
+    listenTo(mouse.moves)
+    reactions += {
+      case MouseEntered(_, _, _) =>
+        clipSound.loop(1)
+        foreground = mainColor
+      case MouseExited(_, _, _) =>
+        foreground = grey
+    }
+  }
+
+  val fourthSbelowPanel = new GridPanel(1,3) {
+    contents += fourthSMenuButton
+    contents += emptyLabel
+    contents += fourthSaudioButton
+  }
+
+  val fourthScreenPanel = new GridBagPanel {
+    border = BorderFactory.createEmptyBorder(50,50,0,50)
+
+    add(fourthSabovePanel, new Constraints(0,0,1,1,0.0,0.0,GridBagConstraints.FIRST_LINE_START,GridBagConstraints.BOTH,
+      new Insets(0,0,10,0),0,0))
+    add(fourthSmainPanel, new Constraints(0,1,1,1,0.0,0.0,GridBagConstraints.FIRST_LINE_START,GridBagConstraints.BOTH,
+      new Insets(0,0,0,0),900,500))
+    add(fourthSbelowPanel, new Constraints(0,2,1,1,0.0,0.0,GridBagConstraints.FIRST_LINE_START,GridBagConstraints.BOTH,
+      new Insets(10,0,0,0),0,0))
+  }
+
+  //--------------------------------------------------------------------------------------
   //listen to buttons:
 
   //of first screen:
@@ -705,7 +839,7 @@ class Gui(controller:ControllerInterface) extends Frame {
 
       //sets screen to max
       peer.setExtendedState(AWTFrame.MAXIMIZED_BOTH)
-    //peer.setUndecorated(true)
+      //peer.setUndecorated(true)
   }
 
   listenTo(playButton)
@@ -733,6 +867,28 @@ class Gui(controller:ControllerInterface) extends Frame {
         repaint
       }
   }
+
+  //of fourth screen:
+  listenTo(fourthSMenuButton)
+  reactions += {
+    case ButtonClicked(`fourthSMenuButton`) =>
+      //update audio:
+      if(!soundIsOn){
+        audioButton.text = "\uD83D\uDD07"
+      } else{
+        audioButton.text = "\uD83D\uDD0A"
+        clipMusicWin.stop
+        clipMusic.loop(Clip.LOOP_CONTINUOUSLY)
+      }
+
+      //new Screen:
+      contents = firstScreenPanel
+
+      //sets screen to max
+      peer.setExtendedState(AWTFrame.MAXIMIZED_BOTH)
+    //peer.setUndecorated(true)
+  }
+
 
   //-----------------
   //reactions:
@@ -766,7 +922,6 @@ class Gui(controller:ControllerInterface) extends Frame {
           blinkActionListenerP2.count = 0
       }
 
-
     case event: NewRound =>
       //clear fields:
       for {
@@ -775,6 +930,47 @@ class Gui(controller:ControllerInterface) extends Frame {
       } {
         fields(row)(col).redraw
       }
+
+    case event: GameFinishedWinner =>
+      //update winner label:
+      if(controller.currentPlayerIndex == 0){
+        winnerNameLabel.text = "Congratulations "+
+          controller.playerList(controller.currentPlayerIndex).name.toUpperCase + "! You" +
+          " won " + controller.player0Score.toString + " : " + controller.player1Score.toString + " against " +
+          controller.playerList(controller.nextPlayer) + "!"
+      } else{
+        winnerNameLabel.text = "Congratulations "+
+          controller.playerList(controller.currentPlayerIndex).name.toUpperCase() + "! You" +
+          " won " + controller.player1Score.toString + " : " + controller.player0Score.toString + " against " +
+          controller.playerList(controller.nextPlayer) + "!"
+      }
+
+      //clear fields:
+      for {
+        row <- 0 until 3
+        col <- 0 until 3
+      } {
+        fields(row)(col).redraw
+      }
+
+      //clear scores:
+      player1InfoScore.text = "0"
+      player2InfoScore.text = "0"
+
+      //update audio:
+      if(!soundIsOn){
+        fourthSaudioButton.text = "\uD83D\uDD07"
+      } else{
+        fourthSaudioButton.text = "\uD83D\uDD0A"
+        clipMusic.stop
+        clipMusicWin.loop(Clip.LOOP_CONTINUOUSLY)
+      }
+
+      //new Screen:
+      contents = fourthScreenPanel
+
+      //sets screen to max
+      peer.setExtendedState(AWTFrame.MAXIMIZED_BOTH)
   }
 
   contents = firstScreenPanel

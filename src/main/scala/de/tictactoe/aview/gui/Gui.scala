@@ -750,11 +750,11 @@ class Gui(controller:ControllerInterface) extends Frame {
   reactions += {
     case ButtonClicked(`fourthSaudioButton`) =>
       if(soundIsOn){
-        clipMusic.stop
+        clipMusicWin.stop
         fourthSaudioButton.text = "\uD83D\uDD07"
         soundIsOn = false
       } else{
-        clipMusic.loop(Clip.LOOP_CONTINUOUSLY)
+        clipMusicWin.loop(Clip.LOOP_CONTINUOUSLY)
         fourthSaudioButton.text = "\uD83D\uDD0A"
         soundIsOn = true
       }

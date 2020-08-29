@@ -112,7 +112,6 @@ class Gui(controller:ControllerInterface) extends Frame {
     text = "TicTacToe"
     foreground= blueGrey
     font = tttFont
-    //horizontalAlignment =
   }
 
   val xButton = new Button{

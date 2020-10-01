@@ -2,9 +2,9 @@ package de.tictactoe.controller.controllerComponent.controllerBaseImpl
 
 import com.google.inject.{Guice, Inject}
 import de.tictactoe.TicTacToeModule
-import de.tictactoe.controller.controllerComponent.{ControllerInterface, FieldChanged, GameFinishedWinner, NewGame, NewRound, PlayerChanged, PlayerSwitch, RoundFinishedDraw, ScoreChanged}
+import de.tictactoe.controller.controllerComponent.{ControllerInterface, FieldChanged, GameFinishedWinner, NewGame, NewRound, PlayerChanged, PlayerSwitch, RoundFinishedDraw, RoundFinishedWin, ScoreChanged}
 import de.tictactoe.model.gameboardComponent.GameboardInterface
-import de.tictactoe.model.gameboardComponent.gameboardBaseImpl.Gameboard
+import de.tictactoe.model.gameboardComponent.gameboardBaseImpl.{Field, Gameboard, Matrix}
 import de.tictactoe.model.playerComponent.Player
 import de.tictactoe.util.UndoManager
 
@@ -56,13 +56,13 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
     try {
       input.toInt
     } catch {
-      case e: Exception => return "Wrong input! You have to set the maximum score between 0 and 100! Try it again!"
+      case e: Exception => return "Wrong input! You have to set the maximum score between 0 and 11! Try it again!"
     }
 
-    if(100 > input.toInt && input.toInt> 0){
+    if(11 > input.toInt && input.toInt> 0){
       maxScore = input.toInt
     } else {
-      return "Maximum score has to be between 0 and 100!! xxxTry it again!"
+      return "Maximum score has to be between 0 and 11!! xxxTry it again!"
     }
 
     publish(new ScoreChanged)
@@ -87,9 +87,8 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
     setCount = 0
     gameboard= new Gameboard(false)
     currentPlayerIndex=nextPlayer
-    publish(new PlayerSwitch)
     publish(new NewRound)
-
+    publish(new PlayerSwitch)
     ""
   }
 
@@ -178,7 +177,6 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
         }
       }
     }
-
     false
   }
 
@@ -210,6 +208,7 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
         createNewGame
         return ""
       }
+      publish(new RoundFinishedWin)
       createNewRound
       return ""
     }
@@ -228,6 +227,8 @@ class Controller @Inject()(var gameboard:GameboardInterface) extends ControllerI
   }
 
   override def gameboardToString: String = gameboard.toString
+
+  override def getField: Matrix[Field] = gameboard.fields
 
   override def undo: String = {
     if(setCount <= 0){

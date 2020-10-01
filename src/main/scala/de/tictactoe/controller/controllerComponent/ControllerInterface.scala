@@ -13,6 +13,7 @@ trait ControllerInterface extends Publisher{
   def createNewRound:String
   def set(row:Int, col:Int):String
   def gameboardToString:String
+  def getField: Matrix[Field]
   def undo:String
   def redo:String
   def nextState:Unit
@@ -37,6 +38,7 @@ class PlayerChanged extends Event
 class GameFinishedWinner extends Event
 class RoundFinishedDraw extends Event
 class PlayerSwitch extends Event
-class NewRound extends Event
+class RoundFinishedWin extends Event
 class ScoreChanged extends Event
+class NewRound extends Event
 

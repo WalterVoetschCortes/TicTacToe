@@ -34,4 +34,4 @@ libraryDependencies ++= javaFXModules.map( m=>
   "org.openjfx" % s"javafx-$m" % "14.0.1" classifier osName
 )
 
-coverageExcludedPackages := ".*TicTacToe.*;.*Piece.*"
+coverageExcludedPackages := ".*TicTacToe.*;.*Piece.*;.*Gui.*;.*GameboardInterface.*;.*ControllerInterface.*;.*BlinkLabel.*;.*FieldPanel.*;.*RoundedBorder.*"
